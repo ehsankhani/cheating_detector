@@ -31,11 +31,10 @@ class ASTComparator:
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
                 functions.append(ast.dump(self._normalize_tree(node)))
-        return functions
+        return sorted(functions)  # Sort functions by their content
 
     def compare_functions(self, code1, code2):
-        functions1 = set(self.extract_functions(code1))
-        functions2 = set(self.extract_functions(code2))
-        common_functions = functions1.intersection(functions2)
+        functions1 = self.extract_functions(code1)
+        functions2 = self.extract_functions(code2)
+        common_functions = set(functions1).intersection(set(functions2))
         return len(common_functions) / max(len(functions1), len(functions2), 1)
-    
