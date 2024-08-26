@@ -1,5 +1,6 @@
 import ast
 import astunparse
+import hashlib
 
 
 class ASTComparator:
@@ -25,16 +26,36 @@ class ASTComparator:
     def similarity_score(self, code1, code2):
         return self.compare_ast(code1, code2)
 
-    def extract_functions(self, code):
+    def hash_function(self, func_node):
+        """
+        Generates a hash for a given function node.
+        """
+        function_ast_dump = ast.dump(func_node, annotate_fields=False)
+        return hashlib.md5(function_ast_dump.encode()).hexdigest()
+
+    def extract_function_hashes(self, code):
+        """
+        Extracts and returns a sorted list of hashes for all functions in the code.
+        """
         tree = ast.parse(code)
-        functions = []
+        function_hashes = []
+
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
-                functions.append(ast.dump(self._normalize_tree(node)))
-        return sorted(functions)  # Sort functions by their content
+                func_hash = self.hash_function(node)
+                function_hashes.append(func_hash)
+
+        return sorted(function_hashes)
 
     def compare_functions(self, code1, code2):
-        functions1 = self.extract_functions(code1)
-        functions2 = self.extract_functions(code2)
-        common_functions = set(functions1).intersection(set(functions2))
-        return len(common_functions) / max(len(functions1), len(functions2), 1)
+        """
+        Compares the function hashes between two pieces of code.
+        """
+        hashes1 = self.extract_function_hashes(code1)
+        hashes2 = self.extract_function_hashes(code2)
+
+        if len(hashes1) == 0 or len(hashes2) == 0:
+            return 0
+
+        common_hashes = set(hashes1).intersection(set(hashes2))
+        return len(common_hashes) / max(len(hashes1), len(hashes2))

@@ -3,7 +3,6 @@ from similarity_detector import SimilarityDetector
 from ast_comparator import ASTComparator
 from tokenizer import Tokenizer
 from levenshtein import similarity_score as levenshtein_similarity
-# from block_permutation_detector import BlockPermutationDetector
 
 
 class CheatingDetector:
@@ -13,6 +12,7 @@ class CheatingDetector:
         self.ast_comparator = ASTComparator()
         self.tokenizer = Tokenizer()
         self.levenshtein_similarity = levenshtein_similarity
+        self.detailed_results = []  # Store detailed results here
 
     def analyze(self):
         files = self.reader.read_files()
@@ -25,7 +25,7 @@ class CheatingDetector:
 
         enhanced_results = []
         for file1, file2, text_sim_score in results:
-            # AST similarity
+            # AST function hash comparison
             ast_sim_score = self.ast_comparator.compare_functions(files[file1], files[file2])
 
             # Token similarity
@@ -36,14 +36,17 @@ class CheatingDetector:
 
             # Weighted score calculation
             overall_score = (
-                    0.3 * text_sim_score +
-                    0.3 * ast_sim_score +  # Increased weight on AST similarity
+                    0.2 * text_sim_score +
+                    0.4 * ast_sim_score +  # Increased weight on AST similarity
                     0.2 * token_sim_score +
                     0.2 * lev_sim_score
             )
 
-            if overall_score > 0.85:  # Adjust threshold as needed
+            if overall_score > 0.7:  # Adjust threshold as needed
                 enhanced_results.append((file1, file2, overall_score))
+
+        # Store the detailed results
+        self.detailed_results = enhanced_results
 
         return enhanced_results
 
@@ -57,3 +60,11 @@ class CheatingDetector:
         for file1, file2, score in results:
             report.append(f'Possible cheating between {file1} and {file2} with a similarity score of {score:.2f}')
         return report
+
+    def get_detailed_results(self):
+        """
+        Return the detailed results after analysis.
+        """
+        if not self.detailed_results:
+            print("No detailed results available. Run analyze() first.")
+        return self.detailed_results

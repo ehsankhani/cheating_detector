@@ -1,48 +1,81 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QFileDialog, QVBoxLayout, QWidget, QTextEdit
-import traceback
+from PyQt6 import QtCore
+from PyQt6.QtWidgets import (
+    QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QFileDialog, QTextEdit, QListWidget, QLabel
+)
+from PyQt6.QtCore import Qt
+
+from cheating_detector import CheatingDetector
+from excel_exporter import ExcelExporter  # Import the new ExcelExporter module
 
 
-class CheatingDetectionGUI(QMainWindow):
+class CheatingDetectionApp(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.setWindowTitle("Cheating Detection System")
+        self.setGeometry(100, 100, 800, 600)
 
-        self.setWindowTitle('Cheating Detection Tool')
-        self.setGeometry(100, 100, 600, 400)
+        self.detector = None
 
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
+        # Central widget
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
 
-        self.layout = QVBoxLayout(self.central_widget)
+        # Layout
+        layout = QVBoxLayout(central_widget)
 
-        self.select_folder_button = QPushButton('Select Homework Folder', self)
-        self.select_folder_button.clicked.connect(self.load_homework_folder)
+        # Add buttons
+        self.btn_select_folder = QPushButton("Select Folder", self)
+        self.btn_select_folder.clicked.connect(self.select_folder)
+        layout.addWidget(self.btn_select_folder)
 
-        self.result_display = QTextEdit(self)
-        self.result_display.setReadOnly(True)
+        self.btn_run_detection = QPushButton("Run Detection", self)
+        self.btn_run_detection.clicked.connect(self.run_detection)
+        layout.addWidget(self.btn_run_detection)
 
-        self.layout.addWidget(self.select_folder_button)
-        self.layout.addWidget(self.result_display)
+        self.btn_export_excel = QPushButton("To Excel", self)
+        self.btn_export_excel.clicked.connect(self.export_to_excel)
+        layout.addWidget(self.btn_export_excel)
 
-    def load_homework_folder(self):
-        directory = QFileDialog.getExistingDirectory(self, 'Select Directory')
-        if directory:
-            try:
-                from cheating_detector import CheatingDetector
-                detector = CheatingDetector(directory)
-                report = detector.get_cheating_report()
-                self.result_display.setPlainText('\n'.join(report))
-            except Exception as e:
-                error_message = f"An error occurred: {str(e)}\n{traceback.format_exc()}"
-                self.result_display.setPlainText(error_message)
+        # Output box
+        self.output_box = QListWidget(self)
+        layout.addWidget(self.output_box)
 
+        self.folder_path = "\\"
 
-def main():
-    app = QApplication(sys.argv)
-    window = CheatingDetectionGUI()
-    window.show()
-    sys.exit(app.exec())
+    def select_folder(self):
+        folder_path = QFileDialog.getExistingDirectory(self, "Select Homework Folder")
+        if folder_path:
+            self.folder_path = folder_path
+            self.output_box.addItem(f"Selected folder: {self.folder_path}")
+
+    def run_detection(self):
+        if not self.folder_path:
+            self.output_box.addItem("No folder selected!")
+            return
+
+        self.detector = CheatingDetector(self.folder_path)
+        report = self.detector.get_cheating_report()
+
+        self.output_box.clear()  # Clear previous output
+        for line in report:
+            self.output_box.addItem(line)
+
+    def export_to_excel(self):
+        if not self.detector:
+            self.output_box.addItem("No detection run yet!")
+            return
+
+        excel_exporter = ExcelExporter(self.detector)  # Pass the detector to the ExcelExporter
+        save_path, _ = QFileDialog.getSaveFileName(self, "Save Report As", "", "Excel Files (*.xlsx)")
+
+        if save_path:
+            excel_exporter.export(save_path)
+            self.output_box.addItem(f"Report saved to: {save_path}")
 
 
 if __name__ == "__main__":
-    main()
+    app = QApplication(sys.argv)
+    window = CheatingDetectionApp()
+    window.show()
+    sys.exit(app.exec())
