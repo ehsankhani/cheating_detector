@@ -1,12 +1,12 @@
 import sys
-from PyQt6 import QtCore
-from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QFileDialog, QTextEdit, QListWidget, QLabel
-)
 from PyQt6.QtCore import Qt
-
+from PyQt6.QtWidgets import (
+    QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QFileDialog, QListWidget, QListWidgetItem
+)
 from cheating_detector import CheatingDetector
-from excel_exporter import ExcelExporter  # Import the new ExcelExporter module
+from excel_exporter import ExcelExporter
+from code_comparison_dialog import CodeComparisonDialog  # Import the new dialog class
+from PyQt6.QtGui import QFont
 
 
 class CheatingDetectionApp(QMainWindow):
@@ -16,6 +16,7 @@ class CheatingDetectionApp(QMainWindow):
         self.setGeometry(100, 100, 800, 600)
 
         self.detector = None
+        self.folder_path = ""  # Store the selected folder path
 
         # Central widget
         central_widget = QWidget()
@@ -39,14 +40,13 @@ class CheatingDetectionApp(QMainWindow):
 
         # Output box
         self.output_box = QListWidget(self)
+        self.output_box.setFont(QFont("Arial", 11))
         layout.addWidget(self.output_box)
-
-        self.folder_path = "\\"
 
     def select_folder(self):
         folder_path = QFileDialog.getExistingDirectory(self, "Select Homework Folder")
         if folder_path:
-            self.folder_path = folder_path
+            self.folder_path = folder_path  # Store the selected folder path
             self.output_box.addItem(f"Selected folder: {self.folder_path}")
 
     def run_detection(self):
@@ -59,7 +59,30 @@ class CheatingDetectionApp(QMainWindow):
 
         self.output_box.clear()  # Clear previous output
         for line in report:
-            self.output_box.addItem(line)
+            # Create a QListWidgetItem for each line
+            item = QListWidgetItem(line)
+            item.setData(Qt.ItemDataRole.UserRole, line)
+            self.output_box.addItem(item)
+
+        # Connect item clicked signal to handler
+        self.output_box.itemClicked.connect(self.on_item_clicked)
+
+    def on_item_clicked(self, item):
+        # Get the message from the clicked item
+        message = item.data(Qt.ItemDataRole.UserRole)
+
+        # Extract the file names from the message
+        part1 = message.split(' between ')[1].split(' and ')
+        file1 = part1[0]
+        file2 = part1[1].split(' with ')[0]
+
+        # Read the content of the files using the full path
+        code1 = self.get_file_content(file1)
+        code2 = self.get_file_content(file2)
+
+        # Open the comparison dialog with filenames
+        dialog = CodeComparisonDialog(code1, code2, file1, file2, self)
+        dialog.exec()
 
     def export_to_excel(self):
         if not self.detector:
@@ -72,6 +95,15 @@ class CheatingDetectionApp(QMainWindow):
         if save_path:
             excel_exporter.export(save_path)
             self.output_box.addItem(f"Report saved to: {save_path}")
+
+    def get_file_content(self, filename):
+        # Construct the full path using the selected folder path and the filename
+        full_path = f"{self.folder_path}/{filename}"
+        try:
+            with open(full_path, 'r') as file:
+                return file.read()
+        except FileNotFoundError:
+            return f"File not found: {full_path}"
 
 
 if __name__ == "__main__":
