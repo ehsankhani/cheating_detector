@@ -38,12 +38,13 @@ class ExcelExporter:
                 cell.alignment = Alignment(horizontal='center', vertical='center')
                 cell.fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
 
+            # Dictionary to keep track of students and their maximum cheating score
+            students_scores = {}
+
             # Fill data
             report = self.detector.get_cheating_report()
-            students_set = set()
 
             for line in report:
-                # Extract the two filenames and the similarity score from the report
                 try:
                     part1 = line.split(' between ')[1].split(' and ')
                     file1 = part1[0]
@@ -57,17 +58,22 @@ class ExcelExporter:
                 name1, id1 = self.parse_filename(file1)
                 name2, id2 = self.parse_filename(file2)
 
-                # Append first student
-                if (name1, id1) not in students_set:
-                    final_grade1 = "0" if similarity == 100 else "Undetermined"
-                    sheet.append([name1, id1, "", f"{similarity:.2f}", final_grade1])
-                    students_set.add((name1, id1))
+                # Update the score for the first student
+                if (name1, id1) in students_scores:
+                    students_scores[(name1, id1)] = max(students_scores[(name1, id1)], similarity)
+                else:
+                    students_scores[(name1, id1)] = similarity
 
-                # Append second student
-                if (name2, id2) not in students_set:
-                    final_grade2 = "0" if similarity == 100 else "Undetermined"
-                    sheet.append([name2, id2, "", f"{similarity:.2f}", final_grade2])
-                    students_set.add((name2, id2))
+                # Update the score for the second student
+                if (name2, id2) in students_scores:
+                    students_scores[(name2, id2)] = max(students_scores[(name2, id2)], similarity)
+                else:
+                    students_scores[(name2, id2)] = similarity
+
+            # Write the data to the sheet
+            for (name, student_id), cheat_score in students_scores.items():
+                final_grade = "0" if cheat_score == 100 else "Undetermined"
+                sheet.append([name, student_id, "", f"{cheat_score:.2f}", final_grade])
 
             # Add empty row for separation
             sheet.append([])

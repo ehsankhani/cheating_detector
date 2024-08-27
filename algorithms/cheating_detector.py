@@ -1,8 +1,8 @@
-from file_reader import FileReader
-from similarity_detector import SimilarityDetector
-from ast_comparator import ASTComparator
-from tokenizer import Tokenizer
-from levenshtein import similarity_score as levenshtein_similarity
+from utils.file_reader import FileReader
+from algorithms.similarity_detector import SimilarityDetector
+from algorithms.ast_comparator import ASTComparator
+from algorithms.tokenizer import Tokenizer
+from algorithms.levenshtein import similarity_score as levenshtein_similarity
 
 
 class CheatingDetector:
