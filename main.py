@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QFileDialog, QListWidget, QListWidgetItem
 )
 from algorithms.cheating_detector import CheatingDetector
-from utils.excel_exporter import ExcelExporter
+from Utils.excel_exporter import ExcelExporter
 from algorithms.code_comparison_dialog import CodeComparisonDialog  # Import the new dialog class
 from PyQt6.QtGui import QFont
 
