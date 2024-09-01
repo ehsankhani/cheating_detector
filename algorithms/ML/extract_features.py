@@ -2,7 +2,7 @@ import os
 import ast
 import pandas as pd
 from algorithms.ast_comparator import ASTComparator
-from algorithms.tokenizer import Tokenizer
+from algorithms.tokenizer import EnhancedTokenizer
 from algorithms.levenshtein import similarity_score as levenshtein_similarity
 
 
@@ -83,7 +83,7 @@ csv_file = os.path.join(grandparent_dir, 'DataSet', 'cheating_dataset.csv')
 
 # Initialize feature extractors
 ast_comparator = ASTComparator()
-tokenizer = Tokenizer()
+tokenizer = EnhancedTokenizer()
 
 
 def extract_features(file1, file2):

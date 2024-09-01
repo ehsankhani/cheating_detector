@@ -4,7 +4,7 @@ import pandas as pd
 from Utils.file_reader import FileReader
 from algorithms.similarity_detector import SimilarityDetector
 from algorithms.ast_comparator import ASTComparator
-from algorithms.tokenizer import Tokenizer
+from algorithms.tokenizer import EnhancedTokenizer
 from algorithms.levenshtein import similarity_score as levenshtein_similarity
 from algorithms.extra_features import extract_extra_features  # Import the new module
 
@@ -14,7 +14,7 @@ class CheatingDetector:
         self.reader = FileReader(directory)
         self.similarity_detector = None
         self.ast_comparator = ASTComparator()
-        self.tokenizer = Tokenizer()
+        self.tokenizer = EnhancedTokenizer()
         self.levenshtein_similarity = levenshtein_similarity
         self.detailed_results = []
 
@@ -69,13 +69,13 @@ class CheatingDetector:
                 ml_prediction = self.model.predict(scaled_features)[0]
 
                 overall_score = (
-                        0.2 * text_sim_score +
+                        0.1 * text_sim_score +
                         0.4 * ast_sim_score +
                         0.2 * token_sim_score +
-                        0.2 * lev_sim_score
+                        0.3 * lev_sim_score
                 )
 
-                if ml_prediction == 1 and overall_score > 0.7:
+                if overall_score > 0.55 and ml_prediction == 1:
                     enhanced_results.append((file1, file2, overall_score, ml_prediction))
 
             self.detailed_results = enhanced_results

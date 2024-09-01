@@ -1,14 +1,27 @@
 import tokenize
 from io import StringIO
+import keyword
 
 
-class Tokenizer:
+class EnhancedTokenizer:
+    def __init__(self):
+        self.keywords = set(keyword.kwlist)
+
     def tokenize_code(self, code):
         tokens = []
         reader = StringIO(code).readline
         for token in tokenize.generate_tokens(reader):
-            if token.type in (tokenize.NAME, tokenize.NUMBER):
-                tokens.append((token.type, "_token"))
+            if token.type == tokenize.NAME:
+                if token.string in self.keywords:
+                    tokens.append((token.type, token.string))
+                else:
+                    tokens.append((token.type, "_name"))  # Normalize variable and function names
+            elif token.type == tokenize.NUMBER:
+                tokens.append((token.type, "_number"))  # Normalize all numbers
+            elif token.type == tokenize.STRING:
+                tokens.append((token.type, "_string"))  # Normalize all strings
+            elif token.type == tokenize.COMMENT:
+                tokens.append((token.type, "_comment"))  # Normalize comments
             else:
                 tokens.append((token.type, token.string))
         return tokens
