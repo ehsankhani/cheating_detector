@@ -91,7 +91,7 @@
 #############################################################################################################
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split, GridSearchCV, StratifiedKFold
 from xgboost import XGBClassifier
 import pickle
 import os
@@ -137,8 +137,11 @@ param_grid = {
     'colsample_bytree': [0.8, 0.9, 1.0]
 }
 
-# Setup GridSearchCV with a different scoring metric
-grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=3, scoring='f1')
+# Setup Stratified K-Folds
+skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+# Setup GridSearchCV with Stratified K-Folds
+grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=skf, scoring='f1')
 
 # Fit GridSearchCV
 grid_search.fit(X_train_scaled, y_train)
@@ -147,7 +150,14 @@ grid_search.fit(X_train_scaled, y_train)
 best_params = grid_search.best_params_
 best_model = grid_search.best_estimator_
 
-print(f"Best parameters: {best_params}")
+# Make predictions on the test set
+y_pred = best_model.predict(X_test_scaled)
+
+# Print the confusion matrix
+print(confusion_matrix(y_test, y_pred))
+
+# Print a classification report
+print(classification_report(y_test, y_pred))
 
 # Save the best model and scaler
 with open('best_cheating_detector_model.pkl', 'wb') as model_file:
@@ -157,3 +167,4 @@ with open('scaler.pkl', 'wb') as scaler_file:
     pickle.dump(scaler, scaler_file)
 
 print("Best model and scaler saved.")
+
