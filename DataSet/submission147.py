@@ -44,5 +44,6 @@ def main():
     plot_data(df)
 
 
-if name == "main":
+if __name__ == "main":
     main()
+    

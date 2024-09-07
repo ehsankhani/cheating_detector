@@ -160,11 +160,10 @@ print(confusion_matrix(y_test, y_pred))
 print(classification_report(y_test, y_pred))
 
 # Save the best model and scaler
-with open('best_cheating_detector_model.pkl', 'wb') as model_file:
+with open('cheating_detector_model.pkl', 'wb') as model_file:
     pickle.dump(best_model, model_file)
 
 with open('scaler.pkl', 'wb') as scaler_file:
     pickle.dump(scaler, scaler_file)
 
 print("Best model and scaler saved.")
-

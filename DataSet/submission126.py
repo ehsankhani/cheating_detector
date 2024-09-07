@@ -28,4 +28,15 @@ def list_devices(devices):
 def main():
     # Main function to handle mobile devices
     devices = []
-    add_device(devices, "Sony", "Xperia 
+    add_device(devices, "Sony", "Xperia", "Android 10")
+    add_device(devices, "Nokia", "8.3", "Android 11")
+
+    print("List of mobile devices:")
+    list_devices(devices)
+
+    print("Search for devices by model:")
+    search_device_by_model(devices, "8.3")
+
+
+if __name__ == "main":
+    main()
