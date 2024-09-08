@@ -70,12 +70,12 @@ class CheatingDetector:
 
                 overall_score = (
                         0.1 * text_sim_score +
-                        0.4 * ast_sim_score +
-                        0.2 * token_sim_score +
-                        0.3 * lev_sim_score
+                        0.2 * ast_sim_score +
+                        0.5 * token_sim_score +
+                        0.2 * lev_sim_score
                 )
 
-                if overall_score > 0.55 and ml_prediction == 1:
+                if overall_score > 0.60 and ml_prediction == 1:
                     enhanced_results.append((file1, file2, overall_score, ml_prediction))
 
             self.detailed_results = enhanced_results
