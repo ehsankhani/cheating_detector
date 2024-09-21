@@ -38,6 +38,10 @@ class CheatingDetectionApp(QMainWindow):
         self.btn_export_excel.clicked.connect(self.export_to_excel)
         layout.addWidget(self.btn_export_excel)
 
+        self.btn_export_excel_students = QPushButton("Excel for students", self)
+        self.btn_export_excel_students.clicked.connect(self.export_for_students)
+        layout.addWidget(self.btn_export_excel_students)
+
         # Output box
         self.output_box = QListWidget(self)
         self.output_box.setFont(QFont("Arial", 11))
@@ -89,12 +93,35 @@ class CheatingDetectionApp(QMainWindow):
             self.output_box.addItem("No detection run yet!")
             return
 
-        excel_exporter = ExcelExporter(self.detector)  # Pass the detector to the ExcelExporter
+        excel_exporter = ExcelExporter(self.detector, self.folder_path)  # Pass the detector to the ExcelExporter
         save_path, _ = QFileDialog.getSaveFileName(self, "Save Report As", "", "Excel Files (*.xlsx)")
 
         if save_path:
             excel_exporter.export(save_path)
             self.output_box.addItem(f"Report saved to: {save_path}")
+
+    def export_for_students(self):
+        if not self.detector:
+            self.output_box.addItem("No detection run yet!")
+            return
+
+        excel_exporter = ExcelExporter(self.detector, self.folder_path)
+
+        try:
+            save_path, _ = QFileDialog.getSaveFileName(self, "Save Student Report As", "", "Excel Files (*.xlsx)")
+
+            if save_path:
+                # Check if the file path is valid before proceeding
+                if not save_path.lower().endswith('.xlsx'):
+                    save_path += '.xlsx'
+
+                excel_exporter.export_for_students(save_path)
+                self.output_box.addItem(f"Student report saved to: {save_path}")
+            else:
+                self.output_box.addItem("Save operation canceled by the user.")
+        except Exception as e:
+            print(f"Error during export: {e}")
+            self.output_box.addItem(f"Error during export: {e}")
 
     def get_file_content(self, filename):
         # Construct the full path using the selected folder path and the filename
