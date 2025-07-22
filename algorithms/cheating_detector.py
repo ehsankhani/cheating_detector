@@ -1,7 +1,7 @@
 import os
 import joblib
 import pandas as pd
-from Utils.file_reader import FileReader
+from utils.file_reader import FileReader
 from algorithms.similarity_detector import SimilarityDetector
 from algorithms.ast_comparator import ASTComparator
 from algorithms.tokenizer import EnhancedTokenizer
