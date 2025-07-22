@@ -293,5 +293,5 @@ For issues, questions, or contributions, please refer to the project documentati
 
 ---
 
-**Note**: This system is designed for educational environments and should be used responsibly in accordance with institutional policies on academic integrity.
-**p.s:** for further and complete information you can use *project report.pdf*; its complete and structured report about the cheating detector system in persian.
+**Note:** This system is designed for educational environments and should be used responsibly in accordance with institutional policies on academic integrity.  
+**P.S.** For further and complete information, you can use *project report.pdf* — it's a complete and structured report about the cheating detector system in Persian.
